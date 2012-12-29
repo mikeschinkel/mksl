@@ -1,0 +1,131 @@
+#!/bin/bash
+#Author: Mike Schinkel <mike@newclarity.net>
+
+WP_CONTENT_DIR="public_html/wp-content"
+THING_ROOT=~
+
+while getopts "l:p:t:s:c:" arg
+	do
+		if [ "$arg" = "p" ]; then
+			THING=$OPTARG
+			PARENT=plugins/$OPTARG
+			if [ "$TYPE" = "" ]; then
+				TYPE=plugins
+				PATH=$THING_ROOT/Plugins
+			fi
+		elif [ "$arg" = "l" ]; then
+			THING=$OPTARG
+			TYPE=libraries
+			PATH=$THING_ROOT/Libraries
+		elif [ "$arg" = "t" ]; then
+			THING=$OPTARG
+			PARENT=themes/$OPTARG
+			TYPE=themes
+			PATH=$THING_ROOT/Themes
+		elif [ "$arg" = "s" ]; then
+			SITE="$OPTARG"
+		elif [ "$arg" = "c" ]; then
+			WP_CONTENT_DIR=$OPTARG
+		fi
+	done
+
+
+if [ "$TYPE$SITE" = "" ]; then
+	echo "mksl => MaKeSymLink - Makes a symbolic link for a WordPress Plugin, Theme or Library"
+	echo ""
+	echo "Usage: mksc -s <site> [ -c <wpcd> ] ( -p <plugin> | - t <theme> | -l <library> | -p <plugin> -l <library> )"
+	echo ""
+	echo "   <site> => subdir for site, expected to be in ~/Site/<site>"
+	echo "   <wpcd> => subdir for wp-content, defaults to public_html/wp-content"
+	echo "   <plugin> => subdir for plugin, i.e. jetpack or wp-super-cache"
+	echo "   <theme> => subdir for theme, i.e. twentytwelve or pagelines"
+	echo "   <library> => subdir for library, i.e. sidecar or restian"
+	echo ""
+	echo "   Examples:"
+	echo ""
+	echo "      mksc -s hardcorewp -p jetpack"
+	echo "      => ln -s ~/Plugins/jetpack ~/Sites/hardcorewp/public_html/wp_content/plugins/jetpack"
+	echo ""
+	echo "      mksc -s hardcorewp -t pagelines"
+	echo "      => ln -s ~/Themes/pagelines ~/Sites/hardcorewp/public_html/wp_content/themes/pagelines"
+	echo ""
+	echo "      mksc -s hardcorewp -l restian"
+	echo "      => ln -s ~/Libraries/restian ~/Sites/hardcorewp/public_html/wp_content/libraries/restian"
+	echo ""
+	echo "      mksc -s hardcorewp -p diagnostics -l sidecar"
+	echo "      => ln -s ~/Libraries/sidecar ~/Sites/hardcorewp/public_html/wp_content/plugins/diagnostics/libraries/sidecar"
+	echo ""
+	echo "Developed for Mac OS X. Might work on Linux. Will NOT work on Windows; its' a Bash script, not a Batch file."
+	echo ""
+	exit 1
+	echo ""
+elif [ "$TYPE" = "" ]; then
+	echo ""
+	echo "ERROR: No type specified. Expected -p <plugin>, -l <library> or -t <theme>."
+	echo ""
+	exit 2
+elif [ "$SITE" = "" ]; then
+	echo ""
+	echo "ERROR: No site specified. Expected -s <site>."
+	echo ""
+	exit 3
+fi
+
+SOURCE_DIR=$PATH/$THING
+if [ ! -d $SOURCE_DIR ]; then
+	echo ""
+	echo "ERROR: Source directory [$SOURCE_DIR] does not exist."
+	echo ""
+	exit 4
+fi
+
+WP_CONTENT_DIR=~/Sites/$SITE/$WP_CONTENT_DIR
+if [ ! -d $WP_CONTENT_DIR ]; then
+	echo ""
+	echo "ERROR: wp-content directory [$WP_CONTENT_DIR] does not exist."
+	echo ""
+	exit 5
+fi
+
+if [[ "$TYPE" = "libraries" && "$PARENT" != "" ]]; then
+	SYMLINK_PARENT_DIR=$WP_CONTENT_DIR/$PARENT
+	if [[ ! -d $SYMLINK_PARENT_DIR ]]; then
+		/bin/mkdir $SYMLINK_PARENT_DIR
+	fi
+	SYMLINK_PARENT_DIR=$SYMLINK_PARENT_DIR/libraries
+	if [[ ! -d $SYMLINK_PARENT_DIR ]]; then
+		/bin/mkdir $SYMLINK_PARENT_DIR
+	fi
+
+else
+	SYMLINK_PARENT_DIR=$WP_CONTENT_DIR/$TYPE
+	if [[ ! -d $SYMLINK_PARENT_DIR ]]; then
+		/bin/mkdir $SYMLINK_PARENT_DIR
+	fi
+fi
+if [[ ! -d $SYMLINK_PARENT_DIR ]]; then
+	echo ""
+	echo "ERROR: Symlink directory [$SYMLINK_PARENT_DIR] does not exist."
+	echo ""
+	exit 6
+fi
+
+SYMLINK_DIR=$SYMLINK_PARENT_DIR/$THING
+if [ -d $SYMLINK_DIR ]; then
+	echo ""
+	echo "ERROR: Symlink directory [$SYMLINK_DIR] already exists."
+	echo ""
+	exit 7
+fi
+
+#echo ln -s $SOURCE_DIR $SYMLINK_DIR
+#/bin/ln -s $SOURCE_DIR $SYMLINK_DIR
+echo ""
+echo SUCCESS! Symlink created.
+echo ""
+echo "   Source:  $SOURCE_DIR"
+echo "   Symlink: $SYMLINK_DIR"
+echo ""
+
+
+
