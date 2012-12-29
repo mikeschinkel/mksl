@@ -119,7 +119,7 @@ if [ -d $SYMLINK_DIR ]; then
 fi
 
 #echo ln -s $SOURCE_DIR $SYMLINK_DIR
-#/bin/ln -s $SOURCE_DIR $SYMLINK_DIR
+/bin/ln -s $SOURCE_DIR $SYMLINK_DIR
 echo ""
 echo SUCCESS! Symlink created.
 echo ""
