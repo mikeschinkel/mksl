@@ -35,7 +35,7 @@ while getopts "s:c:dp:t:l:n:" arg
 	done
 
 if [ "$NAME" = "" ]; then
-  $NAME=$THING
+  NAME=$THING
 fi
 
 if [ "$TYPE$SITE" = "" ]; then
@@ -127,15 +127,16 @@ if [[ ! -d $SYMLINK_PARENT_DIR ]]; then
 fi
 
 SYMLINK_DIR=$SYMLINK_PARENT_DIR/$NAME$DEV
-if [ -d $SYMLINK_DIR ]; then
+if [ -h $SYMLINK_DIR ]; then
 	echo ""
 	echo "ERROR: Symlink directory [$SYMLINK_DIR] already exists."
 	echo ""
 	exit 7
 fi
 
-#echo ln -s $SOURCE_DIR $SYMLINK_DIR
 /bin/ln -s $SOURCE_DIR $SYMLINK_DIR
+echo ""
+echo COMMAND: ln -s $SOURCE_DIR $SYMLINK_DIR
 echo ""
 echo "SUCCESS! Symlink created."
 echo ""
