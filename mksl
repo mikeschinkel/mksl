@@ -5,7 +5,7 @@ WP_CONTENT_DIR="public_html/wp-content"
 THING_ROOT=~
 DEV=
 
-while getopts "s:c:dp:t:l:" arg
+while getopts "s:c:dp:t:l:n:" arg
 	do
 		if [ "$arg" = "p" ]; then
 			THING=$OPTARG
@@ -29,17 +29,23 @@ while getopts "s:c:dp:t:l:" arg
 			WP_CONTENT_DIR=$OPTARG
 		elif [ "$arg" = "d" ]; then
 			DEV="-dev"
+		elif [ "$arg" = "n" ]; then
+			NAME=$OPTARG
 		fi
 	done
 
+if [ "$NAME" = "" ]; then
+  $NAME=$THING
+fi
 
 if [ "$TYPE$SITE" = "" ]; then
 	echo "mksl => MaKeSymLink - Makes a symbolic link for a WordPress Plugin, Theme or Library"
 	echo ""
-	echo "Usage: mksc -s <site> [ -c <wpcd> ] [ -d ] ( -p <plugin> | - t <theme> | -l <library> | -p <plugin> -l <library> )"
+	echo "Usage: mksc -s <site> [ -c <wpcd> ] [ -c <name> ] [ -d ] ( -p <plugin> | - t <theme> | -l <library> | -p <plugin> -l <library> )"
 	echo ""
 	echo "   -s <site>    => subdir for site, expected to be in ~/Site/<site>"
 	echo "   -c <wpcd>    => subdir for wp-content, defaults to public_html/wp-content"
+	echo "   -n <name>    => name of plugin, theme or library directory if different"
 	echo "   -d           => append -dev to the end of the plugin, theme or library symlink"
 	echo "   -p <plugin>  => subdir for plugin, i.e. jetpack or wp-super-cache"
 	echo "   -t <theme>   => subdir for theme, i.e. twentytwelve or pagelines"
@@ -50,8 +56,11 @@ if [ "$TYPE$SITE" = "" ]; then
 	echo "      mksc -s hardcorewp -p jetpack"
 	echo "      => ln -s ~/Plugins/jetpack ~/Sites/hardcorewp/public_html/wp_content/plugins/jetpack"
 	echo ""
-	echo "      mksc -s hardcorewp -p diagnostics"
+	echo "      mksc -s hardcorewp -p diagnostics -d"
 	echo "      => ln -s ~/Plugins/diagnostics ~/Sites/hardcorewp/public_html/wp_content/plugins/diagnostics-dev"
+	echo ""
+	echo "      mksc -s hardcorewp -p diagnostics -n diag"
+	echo "      => ln -s ~/Plugins/diagnostics ~/Sites/hardcorewp/public_html/wp_content/plugins/diag"
 	echo ""
 	echo "      mksc -s hardcorewp -t pagelines"
 	echo "      => ln -s ~/Themes/pagelines ~/Sites/hardcorewp/public_html/wp_content/themes/pagelines"
@@ -117,7 +126,7 @@ if [[ ! -d $SYMLINK_PARENT_DIR ]]; then
 	exit 6
 fi
 
-SYMLINK_DIR=$SYMLINK_PARENT_DIR/$THING$DEV
+SYMLINK_DIR=$SYMLINK_PARENT_DIR/$NAME$DEV
 if [ -d $SYMLINK_DIR ]; then
 	echo ""
 	echo "ERROR: Symlink directory [$SYMLINK_DIR] already exists."
